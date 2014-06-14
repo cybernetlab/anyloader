@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+<head>
+  <title>AnyLoader Unit Test With Mocha</title>
+  <link rel="stylesheet" href="../lib/mocha/mocha.css"/>
+</head>
+<body>
+  <div id="mocha"></div>
+  <script src="../lib/jquery/dist/jquery.js"></script>
+  <script src="../lib/underscore/underscore.js"></script>
+  <script src="../anyloader.js"></script>
+  <script src="../lib/expect/index.js"></script>
+  <script src="../lib/mocha/mocha.js"></script>
+  <script>mocha.setup('bdd')</script>
+  <script src="spec/anyloader-spec.js"></script>
+  <script>
+    mocha.checkLeaks();
+//    mocha.globals(['jQuery']);
+    mocha.run();
+  </script>
+</body>
+</html>

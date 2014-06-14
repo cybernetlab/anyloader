@@ -1,0 +1,25 @@
+{
+  "name": "anyloader",
+  "version": "1.0.0",
+  "homepage": "https://github.com/cybernetlab/anyloader",
+  "authors": [
+    "Alexey Ovchinnikov <alexiss@cybernetlab.ru>"
+  ],
+  "main": "dist/anyloader.js",
+  "ignore": [
+    "components",
+    "dev",
+    "test",
+    "tests",
+    "**/*.txt"
+  ],
+  "dependencies": {
+    "jquery": "latest",
+    "underscore": "latest"
+  },
+  "devDependencies": {
+    "requirejs": "latest",
+    "mocha": "latest",
+    "expect": "latest"
+  }
+}
