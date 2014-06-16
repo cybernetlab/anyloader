@@ -1,6 +1,6 @@
 # AnyLoader
 
-AnyLoader is a small JavaScript library for loading object from anythere. Supported sources for loading is:
+AnyLoader is a small JavaScript library for loading object from anythere. Sources supported for loading:
 
 * URL, pointed to HTML or JSON file
 * string containing HTML or JSON

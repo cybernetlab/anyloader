@@ -12,22 +12,13 @@
 }(this, function(LoaderFactory, $) {
 
   describe('anyloader', function() {
-    it('avoid non-function callbacks', function() {
-      expect(function() { LoaderFactory({ create: 0 }); }).to.throwError(/create callback should be a function/);
-      expect(function() { LoaderFactory({ parse: 0 }); }).to.throwError(/parse callback should be a function/);
-    });
-
-    it('allows nested deferreds', function(done) {
+    it('allows nested loaders', function(done) {
       var nested = LoaderFactory();
-      LoaderFactory({ create: function(x) {
-        var d = $.Deferred();
-        nested(x.f1).done(function(y) { d.resolve({ f1: y }); });
-        return d;
-      }})
-        ('<i id="f1"><b id="n1">n1t</b></i>').done(function(obj) {
-          expect(obj).to.eql({ f1: { n1: 'n1t' } });
-          done();
-        });
+      var loader = LoaderFactory({ 'create:f1': nested });
+      loader('<i id="f1"><b id="n1">n1t</b></i>').done(function(obj) {
+        expect(obj).to.eql({ f1: { n1: 'n1t' } });
+        done();
+      });
     });
 
     describe('loading from HTML string', function() {
@@ -36,6 +27,17 @@
           expect(text).to.be('<i class="test"></i>');
           return { f1: 'f1t' };
         }})('<i class="test"></i>').done(function(obj) {
+          expect(obj).to.eql({ f1: 'f1t' });
+          done();
+        });
+      });
+
+      it('invokes parseHTML callback if it given', function(done) {
+        var loader = LoaderFactory({ 'parse:html': function(text) {
+          expect(text).to.be('<i class="test"></i>');
+          return this.defaults['parse:html']('<i name="f1">f1t</i>');
+        }});
+        loader('<i class="test"></i>').done(function(obj) {
           expect(obj).to.eql({ f1: 'f1t' });
           done();
         });
@@ -73,6 +75,17 @@
     });
 
     describe('loading from JSON string', function() {
+      it('invokes parseJSON callback if it given', function(done) {
+        var loader = LoaderFactory({ 'parse:json': function(text) {
+          expect(text).to.be('{"f": "ft"}');
+          return loader.defaults['parse:json']('{"f1": "f1t"}');
+        }});
+        loader('{"f": "ft"}').done(function(obj) {
+          expect(obj).to.eql({ f1: 'f1t' });
+          done();
+        });
+      });
+
       it('parses JSON with line feeds', function(done) {
         LoaderFactory()('{\n\r"f1": "f1t",\n\t"f2": "f2t"}').done(function(obj) {
           expect(obj).to.eql({ f1: 'f1t', f2: 'f2t' });
