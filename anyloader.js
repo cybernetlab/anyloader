@@ -16,7 +16,7 @@
 
   var SELECTOR = '[name],[id],[data-name]';
   var NON_URI = /[{}<>\[\]]/;
-  var URI = /^(?:(https?:\/\/.*)|(?:url\(\s*'([^']*)'\s*\))|(?:url\(\s*"([^"]*)"\s*\))|(?:url\(\s*([^)]*)\s*\)))/;
+  var URI = /^(?:(https?:\/\/.*)|(?:ur[li]\(\s*'([^']*)'\s*\))|(?:ur[li]\(\s*"([^"]*)"\s*\))|(?:ur[li]\(\s*([^)]*)\s*\)))/;
 
   var isDeferred = function(obj) {
     return (obj instanceof $.Deferred) || _.isFunction(obj.then);
@@ -67,18 +67,9 @@
         uri = uri[1] || uri[2] || uri[3] || uri[4]
         $.ajax({ url: uri }).done(function(text, status) {
           if (status == 'success') {
-            // result should be an object (in case of JSON file) or HTML
-            if (_.isObject(text) || _.isString(text)) {
-              var result = load.parse.apply(load.context, [text]);
-              if (isDeferred(result)) {
-                result.done(function(obj) { deferred.resolve(obj); });
-              } else {
-                deferred.resolve(result);
-              }
-            } else {
-              // deferred.reject('wrong object in ' + arg);
-              deferred.resolve(arg);
-            }
+            load.apply(load.context, [text])
+              .done(function(obj) { deferred.resolve(obj); })
+              .fail(function() { deferred.resolve(arg); });
           } else {
             // deferred.reject('error while loading object from ' + arg);
             deferred.resolve(arg);
