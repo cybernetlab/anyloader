@@ -1,6 +1,6 @@
 # AnyLoader
 
-AnyLoader is a small JavaScript library for loading object from anythere. Sources supported for loading:
+AnyLoader is a small JavaScript library for loading object and arrays from anythere. Sources supported for loading:
 
 * URL, pointed to HTML or JSON file
 * string containing HTML or JSON
@@ -58,35 +58,31 @@ loadObject('{ "x": 10, "y": 20 }')
     });
 ```
 
-All loaders returns jQuery deferreds that resolves with loaded objects (In case of local parsing like in example above this would be happen immediatly).
+All loaders returns jQuery deferreds that resolves with loaded objects or arrays (In case of local parsing like in example above this would be happen immediatly).
+
+Each argument passed to loader function, firstly parsed with set of parser functions and then composed to result object or array. You can override any parser or composer in factory options:
+
+```js
+var loadObject = LoaderFactory({
+        'parse:html': function(html) { return [1, 2, 3]; }
+    });
+loadObject('<div class="any html">test</div>'); // => [1, 2, 3]
+loadObject('some string');                      // => 'some string'
+
+var loadObject = LoaderFactory({
+        'parse:html': function(html) { return [1, 2, 3]; },
+        'parse:string': function(str) { return { one: 1, two: 2 }; },
+        'compose:array': function(arr) { return arr.reverse(); }
+        'compose:object[some]': function(v) { return v + 10; }
+    });
+loadObject('<div class="any html">test</div>'); // => [3, 2, 1]
+loadObject('some string');                      // => { one: 11, two: 2 }
+```
+
+Available parsers are: `parse`, `parse:string`, `parse:html`, `parse:uri`, `parse:json`, `parse:jquery`, `parse:array` and `parse:object`.
+
+Available composers are: `compose`, `compose:object`, `compose:object[]`, `compose:object[KEY_NAME]`, `compose:array`, `compose:array[]`, `compose:string` and `compose:deferred`.
 
 While parsing HTML, `anyloader` assumes that field names placed in any of `name`, `id` or `data-name` attributes. If where are no elements with such attributes, `anyloader` will create plain array with values, collected from each top-level element.
 
-If you need other behaviour, you can pass `parse` callback while creating loader and it will be called for any HTML argument, passed to loader. You should return plain object or jQuery nodeset from this callback and it will be used in subsequent processing:
-
-```js
-var loadObject = LoaderFactory({ parse: function(str) {
-    console.log(str); // => '<some><complex><html /></complex></some>'
-    return { x: 10 };
-}});
-
-loadObject('<some><complex><html /></complex></some>')
-    .done(function(obj) {
-        console.log(obj); // => { x: 10 }
-    });
-```
-
-Also you can override object creation with `create` callback:
-
-```js
-var loadObject = LoaderFactory({ create: function(obj) {
-    console.log(obj); // => { x: 10, y: 10 }
-    return { left: obj.x, top: obj.y };
-}});
-
-loadObject('{ "x": 10, "y": 20 }')
-    .done(function(obj) {
-        console.log(obj); // => { left: 10, top: 20 }
-    });
-```
-
+Detailed documentation will be available soon.

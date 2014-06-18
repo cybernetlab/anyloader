@@ -12,11 +12,30 @@
 }(this, function(LoaderFactory, $) {
 
   describe('anyloader', function() {
-    it('allows nested loaders', function(done) {
+    it('allows nested loaders for objects', function(done) {
       var nested = LoaderFactory();
-      var loader = LoaderFactory({ 'create:f1': nested });
+      var loader = LoaderFactory({ 'compose:object[f1]': nested });
       loader('<i id="f1"><b id="n1">n1t</b></i>').done(function(obj) {
         expect(obj).to.eql({ f1: { n1: 'n1t' } });
+        done();
+      });
+    });
+
+    it('allows objects keys callback', function(done) {
+      var loader = LoaderFactory({ 'compose:object[]': function(k, v) {
+        return [k + '_', v + '!'];
+      } });
+      loader('<i id="f1">f1t</i><i id="f2">f2t</i>').done(function(obj) {
+        expect(obj).to.eql({ f1_: 'f1t!', f2_: 'f2t!' });
+        done();
+      });
+    });
+
+    it('allows nested loaders for arrays', function(done) {
+      var nested = LoaderFactory();
+      var loader = LoaderFactory({ 'compose:array[]': nested });
+      loader('<i><b id="n1">n1t</b></i><i><b id="n2">n2t</b></i>').done(function(obj) {
+        expect(obj).to.eql([ { n1: 'n1t' }, { n2: 'n2t'} ]);
         done();
       });
     });
@@ -35,7 +54,7 @@
       it('invokes parse:html callback if it given', function(done) {
         var loader = LoaderFactory({ 'parse:html': function(text) {
           expect(text).to.be('<i class="test"></i>');
-          return this.parsers['parse:html']('<i name="f1">f1t</i>');
+          return this.defaults['parse:html']('<i name="f1">f1t</i>');
         }});
         loader('<i class="test"></i>').done(function(obj) {
           expect(obj).to.eql({ f1: 'f1t' });
@@ -78,7 +97,7 @@
       it('invokes parse:json callback if it given', function(done) {
         var loader = LoaderFactory({ 'parse:json': function(text) {
           expect(text).to.be('{"f": "ft"}');
-          return loader.parsers['parse:json']('{"f1": "f1t"}');
+          return loader.defaults['parse:json']('{"f1": "f1t"}');
         }});
         loader('{"f": "ft"}').done(function(obj) {
           expect(obj).to.eql({ f1: 'f1t' });
